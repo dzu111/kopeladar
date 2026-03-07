@@ -2555,7 +2555,71 @@ body.dark-mode .mega-footer {
     }
 
     .about-text .masked-header h2 {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
+    }
+
+    /* Fixed Timeline Multi-fix */
+    .timeline-line {
+        left: 20px !important;
+        transform: none !important;
+    }
+
+    .timeline-item {
+        width: 100% !important;
+        padding-left: 50px !important;
+        padding-right: 0 !important;
+        text-align: left !important;
+        margin-bottom: 50px !important;
+    }
+
+    .timeline-item:nth-child(even) {
+        margin-left: 0 !important;
+    }
+
+    .timeline-dot {
+        left: 10px !important;
+        right: auto !important;
+        top: 15px !important;
+    }
+
+    .timeline-year {
+        font-size: 1.8rem !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* Fix detail page features - Stack vertically on small screens */
+    .feature-item {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+        text-align: left;
+        margin-bottom: 30px !important;
+    }
+
+    .feature-item>div {
+        width: 100%;
+    }
+
+    /* Fix Contact Box & Form */
+    .contact-box {
+        padding: 50px 20px !important;
+        border-radius: 20px !important;
+    }
+
+    .modern-form {
+        padding: 40px 20px !important;
+        margin-top: 30px;
+    }
+
+    .floating-label label {
+        font-size: 0.8rem !important;
+        left: 15px !important;
+    }
+
+    .floating-label input,
+    .floating-label textarea {
+        font-size: 0.95rem !important;
+        padding: 15px !important;
     }
 }
 
@@ -2565,10 +2629,24 @@ body.dark-mode .mega-footer {
     }
 
     .hero-content h1 {
-        font-size: 2.5rem;
+        font-size: 2rem !important;
     }
 
     .hero-btns {
         flex-direction: column;
+        width: 100%;
+    }
+
+    .hero-btns .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .section-header h2 {
+        font-size: 2rem !important;
+    }
+
+    .internal-hero h1 {
+        font-size: 1.8rem !important;
     }
 }
