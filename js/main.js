@@ -417,38 +417,48 @@ function initNavbarFeatures() {
 const NOTION_TOKEN = "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";
 const DATABASE_ID = "32132d571f31805b97f5c8f3a1b3e44f";
 
-// 2. PROXY CONFIG (Crucial for GitHub Pages)
-const PROXY_URL = "https://corsproxy.io/?";
+// 2. PROXY CONFIG (Updated for AllOrigins to fix GitHub CORS issues)
+const PROXY_URL = "https://api.allorigins.win/get?url=";
 const NOTION_API_URL = `https://api.notion.com/v1/databases/${DATABASE_ID}/query`;
 
 async function fetchActivities() {
     try {
-        console.log("Attempting to fetch data...");
+        console.log("Attempting to fetch data via AllOrigins...");
 
-        const response = await fetch(PROXY_URL + encodeURIComponent(NOTION_API_URL), {
-            method: "POST",
+        // AllOrigins works best by wrapping the request in a GET URL
+        const fetchUrl = `${PROXY_URL}${encodeURIComponent(NOTION_API_URL)}`;
+
+        const response = await fetch(fetchUrl, {
+            method: "POST", // Notion requires POST to query
             headers: {
                 "Authorization": `Bearer ${NOTION_TOKEN}`,
                 "Notion-Version": "2022-06-28",
-                "Content-Type": "application/json",
-                "X-Requested-With": "XMLHttpRequest"
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({})
         });
 
         if (!response.ok) {
-            const errorBody = await response.text();
-            throw new Error(`Notion API Error: ${response.status} - ${errorBody}`);
+            throw new Error(`Proxy/Notion Error: ${response.status}`);
         }
 
-        const data = await response.json();
+        const wrapper = await response.json();
+
+        // AllOrigins returns the Notion data as a string inside 'contents'
+        // We need to parse that string back into a real JavaScript object
+        const data = JSON.parse(wrapper.contents);
+
+        if (data.object === "error") {
+            throw new Error(data.message);
+        }
+
         console.log("Data received from Notion:", data);
         renderCards(data.results);
 
     } catch (error) {
         console.error("DEBUG ERROR:", error);
         document.getElementById('activity-container').innerHTML = `
-            <div style="color: red; padding: 20px; border: 1px solid red;">
+            <div style="color: red; padding: 20px; border: 1px solid red; background: #fff;">
                 <p><strong>Error Loading Activities</strong></p>
                 <small>${error.message}</small>
             </div>`;
