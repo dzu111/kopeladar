@@ -217,7 +217,7 @@
         <p class="error-msg">Error: No profile ID specified in the link.</p>
     `;
         } else {
-            fetch('../json/data.json')
+            fetch('../data.json')
                 .then(response => response.json())
                 .then(data => {
                     const person = data.find(staff => staff.id === profileId);
