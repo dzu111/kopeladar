@@ -1,4 +1,4 @@
-// TRANSLATION DICTIONARY
+﻿// TRANSLATION DICTIONARY
 const translations = {
     'en': {
         'nav-home': 'Home',
@@ -413,114 +413,149 @@ function initNavbarFeatures() {
     }
 }
 
+// ... [End of your initNavbarFeatures function] ...
+
 /**
- * KOPELADAR - News & Announcements (Notion Sync via Cloudflare)
+ * KOPELADAR - Blog/News Section
+ * Logic: Mock data for client consultation
  */
 
-// 1. YOUR BRIDGE URL (The only thing you need here now!)
-const WORKER_URL = "https://kopeladar-bridge.dzulamri070.workers.dev";
+
+// 4 Dummy Pages with High-Quality Image Placeholders
+const mockEvents = [
+    {
+        url: "dummy1.html",
+        category: "Corporate",
+        thumbnail: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=800",
+        properties: {
+            Name: { title: [{ plain_text: "Mesyuarat Agung Tahunan Ke-52" }] },
+            "Event Date": { date: { start: "2026-05-20" } },
+            Description: { rich_text: [{ plain_text: "Sesi perbincangan hala tuju strategik KOPELADAR bagi tahun kewangan 2026/2027." }] }
+        }
+    },
+    {
+        url: "dummy2.html",
+        category: "Charity",
+        thumbnail: "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=800",
+        properties: {
+            Name: { title: [{ plain_text: "Program Infaq Ramadan KOPELADAR" }] },
+            "Event Date": { date: { start: "2026-03-10" } },
+            Description: { rich_text: [{ plain_text: "Sumbangan bakul makanan dan keperluan asas kepada asnaf di Kota Bharu." }] }
+        }
+    },
+    {
+        url: "dummy3.html",
+        category: "Business",
+        thumbnail: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=800",
+        properties: {
+            Name: { title: [{ plain_text: "Pelancaran Produk Air Mineral Baru" }] },
+            "Event Date": { date: { start: "2026-02-15" } },
+            Description: { rich_text: [{ plain_text: "KOPELADAR memperkenalkan pembungkusan mesra alam bagi produk mineral premium." }] }
+        }
+    },
+    {
+        url: "dummy4.html",
+        category: "Operations",
+        thumbnail: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800",
+        properties: {
+            Name: { title: [{ plain_text: "Lawatan Kerja Stesen Shell" }] },
+            "Event Date": { date: { start: "2026-01-05" } },
+            Description: { rich_text: [{ plain_text: "Audit kualiti perkhidmatan pelanggan bagi memastikan piawaian Shell dipatuhi." }] }
+        }
+    }
+];
 
 async function fetchActivities() {
+    const container = document.getElementById('activity-container');
+    if (!container) return;
+
     try {
-        console.log("Connecting to Cloudflare Bridge...");
-
         const response = await fetch(WORKER_URL);
-
-        if (!response.ok) throw new Error("Bridge connection failed");
-
         const data = await response.json();
 
-        if (data.results) {
-            console.log("Success! Data from Bridge:", data.results.length, "items found.");
-            renderCards(data.results);
+        if (data.results && data.results.length > 0) {
+            renderBlogCards(data.results);
         } else {
-            throw new Error("No results found in Notion response");
+            renderBlogCards(mockEvents);
         }
-
     } catch (error) {
-        console.error("DEBUG ERROR:", error);
-        document.getElementById('activity-container').innerHTML = `
-            <div style="text-align:center; padding: 40px; color: #721c24; background: #f8d7da; border-radius: 20px; width: 100%;">
-                <p><strong>Offline</strong></p>
-                <small>The database bridge is currently unavailable.</small>
-            </div>`;
+        console.warn("Using Mock Data with Thumbnails for consultation");
+        renderBlogCards(mockEvents);
     }
 }
 
-function renderCards(events) {
+function renderBlogCards(events) {
     const container = document.getElementById('activity-container');
-    container.innerHTML = ""; // Clear loading message
+    container.innerHTML = "";
 
-    events.forEach(event => {
-        // Data Extraction matching your specific Notion properties
-        const titleProp = event.properties.Name || event.properties.Heading || event.properties.title;
-        const title = titleProp?.title[0]?.plain_text || "Untitled Event";
-
-        const date = event.properties["Event Date"]?.date?.start || "TBA";
+    events.forEach((event, index) => {
+        // Data Extraction
+        const title = event.properties.Name?.title[0]?.plain_text || "Upcoming Event";
+        const date = event.properties["Event Date"]?.date?.start || "2026";
         const desc = event.properties.Description?.rich_text[0]?.plain_text || "";
+        const category = event.category || "General";
 
-        // Handle images (prioritizes Notion uploads, then external links, then placeholder)
+        // Image Logic: 
+        // 1. Try real Notion Thumbnail 
+        // 2. Try our new mock thumbnail 
+        // 3. Fallback to placeholder.co
         const imgObj = event.properties.Thumbnail?.files[0];
-        const img = imgObj?.file?.url || imgObj?.external?.url || "https://placehold.co/600x400?text=KOPELADAR";
+        const img = imgObj?.file?.url || imgObj?.external?.url || event.thumbnail || `https://placehold.co/600x400?text=KOPELADAR+News+${index + 1}`;
 
-        // Generate HTML matching your custom CSS
         container.innerHTML += `
-            <div class="swiper-slide">
-                <article class="news-card">
-                    <div class="news-img">
-                        <img src="${img}" alt="${title}">
-                        <div class="news-date">${date}</div>
+            <div class="col-4 mb-5" data-aos="fade-up" data-aos-delay="${index * 100}">
+                <article class="blog-card">
+                    <div class="blog-img-wrap">
+                        <img src="${img}" alt="${title}" class="blog-img">
+                        <span class="blog-category">${category}</span>
                     </div>
-                    <div class="news-content">
-                        <h4>${title}</h4>
-                        <p>${desc}</p>
-                        <a href="${event.url}" target="_blank" class="read-more">
-                            View Details <i class="bi bi-arrow-right"></i>
+                    <div class="blog-body">
+                        <div class="blog-meta">
+                            <span><i class="far fa-calendar-alt"></i> ${date}</span>
+                            <span><i class="far fa-user"></i> Admin</span>
+                        </div>
+                        <h3 class="blog-title">${title}</h3>
+                        <p class="blog-excerpt">${desc.substring(0, 80)}...</p>
+                        <a href="${event.url}" class="blog-link">
+                            Read Article <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
                 </article>
             </div>
         `;
     });
-
-    // Initialize Swiper after cards are loaded
-    new Swiper('.news-swiper', {
-        slidesPerView: 1,
-        spaceBetween: 30,
-        loop: false, // Prevents errors with fewer than 3 cards
-        pagination: { el: '.swiper-pagination', clickable: true },
-        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-        breakpoints: {
-            768: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 }
-        }
-    });
 }
 
-// Start the fetch process
 fetchActivities();
 
-//main organizational chart
+
+
+// ==========================================
+// 1. KOPELADAR MAIN ORG CHART BUILDER (CSV)
+// ==========================================
 function buildOrgChart() {
     const chartPlaceholder = document.getElementById('org-chart-placeholder');
-    if (!chartPlaceholder) return; // Stop if we aren't on the org chart page
+    if (!chartPlaceholder) return;
 
-    // Change this path if your JSON is in a different folder!
-    fetch('./json/data.json')
-        .then(response => response.json())
-        .then(data => {
+    // PASTE YOUR "MAINBOARD" CSV LINK HERE:
+    const mainBoardCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7-O4rGW_NFEyz98H8oCjpjkrjKaaidnz9eSt9OKBg5HLcnCG5HHee-OOzZyzGTvuvysIy5nLbV8EL/pub?gid=0&single=true&output=csv';
 
-            // 1. Sort people by their secret 'role' tag
+    Papa.parse(mainBoardCsvUrl, {
+        download: true,
+        header: true,
+        complete: function (results) {
+            const data = results.data;
+
+            // The rest is exactly the same!
             const penaung = data.find(person => person.role.toLowerCase() === 'penaung');
             const penasihat = data.find(person => person.role.toLowerCase() === 'penasihat');
             const boardMembers = data.filter(person => person.role.toLowerCase() === 'board');
 
-            // 2. Loop through all board members and build their HTML cards
             let boardHtml = '';
             boardMembers.forEach(member => {
                 boardHtml += `
                     <li>
-                        <a href="/html/profile.html?id=${member.id}">
+                        <a href="profile.html?id=${member.id}&tab=MainBoard">
                             <div class="avatar-container">
                                 <img src="${member.image}" alt="${member.title}" class="avatar-image">
                             </div>
@@ -531,50 +566,130 @@ function buildOrgChart() {
                 `;
             });
 
-            // 3. Assemble the entire chart
             const fullChartHtml = `
                 <div class="org-tree">
                     <ul>
                         <li>
-                            <a href="/html/profile.html?id=${penaung.id}">
-                                <div class="avatar-container">
-                                    <img src="${penaung.image}" alt="${penaung.title}" class="avatar-image">
-                                </div>
+                            <a href="profile.html?id=${penaung.id}&tab=MainBoard">
+                                <div class="avatar-container"><img src="${penaung.image}" class="avatar-image"></div>
                                 <span class="name">${penaung.name}</span>
                                 <span class="title">${penaung.title}</span>
                             </a>
-
                             <ul class="trunk-container">
-                                
                                 <li class="staff-node">
-                                    <a href="/html/profile.html?id=${penasihat.id}">
-                                        <div class="avatar-container">
-                                            <img src="${penasihat.image}" alt="${penasihat.title}" class="avatar-image">
-                                        </div>
+                                    <a href="profile.html?id=${penasihat.id}&tab=MainBoard">
+                                        <div class="avatar-container"><img src="${penasihat.image}" class="avatar-image"></div>
                                         <span class="name">${penasihat.name}</span>
                                         <span class="title">${penasihat.title}</span>
                                     </a>
                                 </li>
-
                                 <li class="regular-branches-wrapper">
-                                    <ul>
-                                        ${boardHtml}
-                                    </ul>
+                                    <ul>${boardHtml}</ul>
                                 </li>
-                                
                             </ul>
                         </li>
                     </ul>
                 </div>
             `;
-
-            // 4. Inject into the page
             chartPlaceholder.innerHTML = fullChartHtml;
-        })
-        .catch(error => {
-            console.error('Error loading org chart:', error);
-            chartPlaceholder.innerHTML = '<p style="color:#d32f2f; text-align:center;">Failed to load data.json</p>';
-        });
+        }
+    });
+}
+
+// ==========================================
+// 2. KOPELADAR LEMBAGA GRID BUILDER (CSV)
+// ==========================================
+function buildBoardGrid() {
+    const gridPlaceholder = document.getElementById('board-grid-placeholder');
+    if (!gridPlaceholder) return;
+
+    // PASTE YOUR "LEMBAGA" CSV LINK HERE:
+    const lembagaCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7-O4rGW_NFEyz98H8oCjpjkrjKaaidnz9eSt9OKBg5HLcnCG5HHee-OOzZyzGTvuvysIy5nLbV8EL/pub?gid=1832132001&single=true&output=csv';
+
+    Papa.parse(lembagaCsvUrl, {
+        download: true,
+        header: true,
+        complete: function (results) {
+            const data = results.data;
+            let gridHtml = '';
+
+            data.forEach((member, index) => {
+                // Skip empty rows generated by Google Sheets
+                if (!member.id) return;
+
+                const delay = (index % 3) * 100;
+                gridHtml += `
+                    <div class="member-card tilt-card" data-tilt data-aos="fade-up" data-aos-delay="${delay}">
+                        <a href="profile.html?id=${member.id}&tab=Lembaga" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                            <div class="member-img"><img src="${member.image}" alt="${member.title}"></div>
+                            <div class="member-info">
+                                <h4>${member.name}</h4>
+                                <p>${member.title}</p>
+                            </div>
+                        </a>
+                    </div>
+                `;
+            });
+            gridPlaceholder.innerHTML = gridHtml;
+        }
+    });
+}
+
+// ==========================================
+// 3. KOPELADAR OFFICE MANAGEMENT BUILDER (CSV)
+// ==========================================
+function buildOfficeChart() {
+    const chartPlaceholder = document.getElementById('office-chart-placeholder');
+    if (!chartPlaceholder) return;
+
+    // PASTE YOUR "PENGURUSAN" CSV LINK HERE:
+    const pengurusanCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7-O4rGW_NFEyz98H8oCjpjkrjKaaidnz9eSt9OKBg5HLcnCG5HHee-OOzZyzGTvuvysIy5nLbV8EL/pub?gid=1506679708&single=true&output=csv';
+
+    Papa.parse(pengurusanCsvUrl, {
+        download: true,
+        header: true,
+        complete: function (results) {
+            const data = results.data;
+
+            const level1 = data.find(person => person.role.toLowerCase() === 'level1');
+            const level2 = data.find(person => person.role.toLowerCase() === 'level2');
+            const level3Staff = data.filter(person => person.role.toLowerCase() === 'level3');
+
+            let level3Html = '';
+            level3Staff.forEach(staff => {
+                level3Html += `
+                    <li>
+                        <a href="profile.html?id=${staff.id}&tab=Pengurusan">
+                            <div class="avatar-container"><img src="${staff.image}" class="avatar-image"></div>
+                            <span class="name">${staff.name}</span>
+                            <span class="title">${staff.title}</span>
+                        </a>
+                    </li>
+                `;
+            });
+
+            const fullChartHtml = `
+                <ul>
+                    <li>
+                        <a href="profile.html?id=${level1.id}&tab=Pengurusan">
+                            <div class="avatar-container"><img src="${level1.image}" class="avatar-image"></div>
+                            <span class="name">${level1.name}</span><span class="title">${level1.title}</span>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="profile.html?id=${level2.id}&tab=Pengurusan">
+                                    <div class="avatar-container"><img src="${level2.image}" class="avatar-image"></div>
+                                    <span class="name">${level2.name}</span><span class="title">${level2.title}</span>
+                                </a>
+                                <ul>${level3Html}</ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            `;
+            chartPlaceholder.innerHTML = fullChartHtml;
+        }
+    });
 }
 
 
@@ -582,6 +697,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     buildOrgChart();
+    buildBoardGrid();
+    buildOfficeChart();
 
     // Initialize Navbar if it exists in static HTML
     if (typeof initNavbarFeatures === 'function') {
