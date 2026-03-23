@@ -187,7 +187,6 @@
     <div id="footer-placeholder"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
     <script src="main.js"></script>
@@ -267,7 +266,7 @@
                         document.getElementById('event-body').innerHTML = bodyHeader + marked.parse(data.body);
                     }
 
-                    // DEFENSIVE CHECK: Dynamic Gallery & Swiper
+                    // 5. DEFENSIVE CHECK: Dynamic Gallery & Swiper
                     const gallerySection = document.querySelector('.media-slider-section');
                     const swiperWrapper = document.getElementById('event-media-container');
                     
@@ -276,17 +275,20 @@
                         
                         // Loop through uploaded photos and create slides
                         data.gallery.forEach(item => {
-                            if (item.photo) {
+                            // Decap saves single-field lists as flat strings, so 'item' IS the URL!
+                            const imageUrl = typeof item === 'string' ? item : item.photo;
+                            
+                            if (imageUrl) {
                                 swiperWrapper.innerHTML += `
                                     <div class="swiper-slide">
-                                        <img src="${item.photo}" alt="Event Gallery Image">
+                                        <img src="${imageUrl}" alt="Event Gallery Image">
                                     </div>
                                 `;
                             }
                         });
 
-                        // Make Swiper "Smart": Only loop if there is more than 1 image
-                        const shouldLoop = data.gallery.length > 1;
+                        // Make Swiper "Smart": Needs at least 3 images to smoothly loop a 1.2 view
+                        const shouldLoop = data.gallery.length > 2;
                         
                         new Swiper('.event-gallery-swiper', {
                             slidesPerView: 1,
